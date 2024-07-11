@@ -27,6 +27,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Autentificación del proyecto
+
+AUTH_USER_MODEL = 'freevisual.Usuario'  # Asegúrate de cambiar 'myapp' por el nombre de tu aplicación
+
+AUTHENTICATION_BACKENDS = [
+    'freevisual.autentificacion.EmailOrUsernameBackend',  # Cambia 'myapp' por el nombre de tu aplicación
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+
 
 # Application definition
 
