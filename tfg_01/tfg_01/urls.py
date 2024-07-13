@@ -24,10 +24,14 @@ urlpatterns = [
 '''
 
 from django.urls import path
-from freevisual.views import LoginView
+from freevisual.views import create_usuario
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 
 urlpatterns = [
-    path('api/login/', LoginView.as_view(), name='login'),
+    path('api/create_usuario/', create_usuario, name='create_usuario'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
 ]
 
 

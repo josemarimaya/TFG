@@ -1,20 +1,22 @@
-from django.shortcuts import render
-
-# Create your views here.
-
-from rest_framework.views import APIView
+from rest_framework import status, generics
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
 
+from .serializer import UsuarioSerializer, EspecialidadSerializer
+from .models import Usuario, Especialidad
+
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        username = request.data.get('username')
+        email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+        user = authenticate(email=email, password=password)
         if user is not None:
             refresh = RefreshToken.for_user(user)
             return Response({
@@ -23,13 +25,13 @@ class LoginView(APIView):
             })
         return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-
-
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         username = request.data.get('username')
+        nombre = request.data.get('nombre')
+        apellido = request.data.get('apellido')
         email = request.data.get('email')
         password1 = request.data.get('password1')
         password2 = request.data.get('password2')
@@ -38,10 +40,22 @@ class RegisterView(APIView):
         if password1 != password2:
             return Response({'error': 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if User.objects.filter(username=username).exists():
+        if Usuario.objects.filter(username=username).exists():
             return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = User.objects.create_user(username=username, email=email, password=password1)
-        # Aquí puedes agregar lógica para manejar las especialidades del usuario
+        if Usuario.objects.filter(email=email).exists():
+            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = Usuario.objects.create_user(username=username, nombre=nombre, apellido=apellido, email=email, password=password1)
+
+        for specialty_name in specialties:
+            specialty, created = Especialidad.objects.get_or_create(nombre=specialty_name)
+            user.especialidades.add(specialty)
+
+        user.save()
 
         return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+
+class EspecialidadListView(generics.ListAPIView):
+    queryset = Especialidad.objects.all()
+    serializer_class = EspecialidadSerializer
