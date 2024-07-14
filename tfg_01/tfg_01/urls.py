@@ -22,16 +22,18 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 ]
 '''
-
+from django.contrib import admin
 from django.urls import path
-from freevisual.views import create_usuario
+from freevisual.views import create_usuario, EspecialidadListView, RegisterView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
 urlpatterns = [
-    path('api/create_usuario/', create_usuario, name='create_usuario'),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
+    path('admin/', admin.site.urls),
+    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/especialidades/', EspecialidadListView.as_view(), name='especialidades'),
+    path('api/create_usuario/', create_usuario, name='create_usuario')
 ]
 
 
